@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Think Dysfunctional Test Generator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    color: #121212;
+    margin: 0;
+    padding: 20px;
+    transition: all 0.3s;
+  }
+  body.dark-mode {
+    background-color: #121212;
+    color: #f0f0f0;
+  }
+  h1 {
+    text-align: center;
+  }
+  h2 {
+    text-align: center;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+  }
+  input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  body.dark-mode input, body.dark-mode textarea {
+    background-color: #1e1e1e;
+    color: #f0f0f0;
+    border: 1px solid #555;
+  }
+  button {
+    margin-top: 15px;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    font-size: 16px;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+  #pdfPreview {
+    margin-top: 20px;
+    width: 100%;
+    height: 600px;
+    border: 1px solid #ccc;
+  }
+  .mode-toggle {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+  }
+</style>
+</head>
+<body>
+<button class="mode-toggle" onclick="toggleMode()">Toggle Dark/Light Mode</button>
+<h1>Think Dysfunctional</h1>
+<h2>Test Generator</h2>
+
+<form id="testForm">
+  <label>Test Name:</label>
+  <input type="text" id="testName" placeholder="Enter test name. . ." required>
+
+  <label>Test Content:</label>
+  <textarea id="testContent" rows="10" placeholder="Enter the flash cards..." required></textarea>
+
+  <label>Number of True/False Questions:</label>
+  <input type="number" id="numTF" min="0" value="0">
+
+  <label>Number of Open-Ended Questions:</label>
+  <input type="number" id="numOpen" min="0" value="0">
+
+  <label>Number of Multiple Choice Questions:</label>
+  <input type="number" id="numMC" min="0" value="0">
+
+  <button type="button" onclick="generateTest()">Generate PDF</button>
+</form>
+
+<iframe id="pdfPreview" title="PDF Preview"></iframe>
+<button id="downloadBtn" style="display:none;" onclick="downloadPDF()">Download PDF</button>
+
+<script>
+function toggleMode() {
+  document.body.classList.toggle('dark-mode');
+}
+
+async function generateTest() {
+  const apiUrl = 'https://organic-meme-qrq7w9954gwhw6j-8000.app.github.dev/generate_test';
+
+  const data = {
+    name: document.getElementById('testName').value,
+    text: document.getElementById('testContent').value,
+    questions: {
+      trueFalse: parseInt(document.getElementById('numTF').value) || 0,
+      openEnded: parseInt(document.getElementById('numOpen').value) || 0,
+      multipleChoice: parseInt(document.getElementById('numMC').value) || 0
+    }
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) throw new Error('API request failed');
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    document.getElementById('pdfPreview').src = url;
+    const downloadBtn = document.getElementById('downloadBtn');
+    downloadBtn.style.display = 'inline-block';
+    downloadBtn.dataset.url = url;
+
+  } catch (error) {
+    alert('Error generating PDF: ' + error.message);
+  }
+}
+
+function downloadPDF() {
+  const url = document.getElementById('downloadBtn').dataset.url;
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'test.pdf';
+  link.click();
+}
+</script>
+</body>
+</html>
