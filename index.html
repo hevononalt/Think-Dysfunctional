@@ -139,7 +139,7 @@ function downloadPDF() {
   const url = document.getElementById('downloadBtn').dataset.url;
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'test.pdf';
+  link.download = testName + '.pdf';
   link.click();
 }
 </script>
